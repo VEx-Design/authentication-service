@@ -1,9 +1,9 @@
 package repository
 
 import (
-	ports "project-management-service/external/_ports"
-	models "project-management-service/external/repository/adaptors/postgres/model"
-	"project-management-service/internal/core/entities"
+	ports "authentication-service/external/_ports"
+	models "authentication-service/external/repository/adaptors/postgres/model"
+	"authentication-service/internal/core/entities"
 
 	"gorm.io/gorm"
 )

@@ -1,13 +1,15 @@
 package handler
 
 import (
+	"authentication-service/external/auth/adaptors/google"
+	"authentication-service/internal/core/entities"
+	"authentication-service/internal/core/logic"
 	"context"
 	"encoding/json"
 	"io"
 	"net/http"
-	"project-management-service/external/auth/adaptors/google"
-	"project-management-service/internal/core/entities"
-	"project-management-service/internal/core/logic"
+	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -23,16 +25,23 @@ func NewAuthHandler(userSrv logic.UserService) *AuthHandler {
 
 func (h *AuthHandler) GoogleLogin(c *gin.Context) {
 	googleConfig := google.Config()
-	url := googleConfig.AuthCodeURL("randomstate")
+
+	redirectTo := c.DefaultQuery("redirect_to", "http://localhost:3000/project")
+	state := "randomstate|" + redirectTo
+
+	url := googleConfig.AuthCodeURL(state)
 	http.Redirect(c.Writer, c.Request, url, http.StatusSeeOther)
 }
 
 func (h *AuthHandler) GoogleCallback(c *gin.Context) {
+	// Parse state to extract redirect URL
 	state := c.DefaultQuery("state", "")
-	if state != "randomstate" {
+	parts := strings.SplitN(state, "|", 2)
+	if len(parts) != 2 || parts[0] != "randomstate" {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "State mismatch"})
 		return
 	}
+	redirectTo := parts[1] // Extract the redirect URL
 
 	code := c.DefaultQuery("code", "")
 	if code == "" {
@@ -69,20 +78,36 @@ func (h *AuthHandler) GoogleCallback(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to unmarshal user data"})
 		return
 	}
-	userId := uuid.New().String()
 
-	h.userSrv.CreateUser(entities.User{
+	userId := uuid.New().String()
+	err = h.userSrv.CreateUser(entities.User{
 		ID:      userId,
 		Email:   userInfo.Email,
 		Name:    userInfo.Name,
 		Picture: userInfo.Picture,
 	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+		return
+	}
 
 	token, err := h.userSrv.GenerateJWT(userId, userInfo.Email)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate JWT"})
 		return
 	}
-	c.SetCookie("Authorization", token, 3600*24, "/", "localhost", false, true)
-	c.Data(http.StatusOK, "application/json", userData)
+
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     "Authorization",
+		Value:    token,
+		Path:     "/",
+		Domain:   "localhost",
+		Expires:  time.Now().Add(24 * time.Hour),
+		Secure:   false,
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+	})
+
+	// Redirect to the original URL or a default one
+	c.Redirect(http.StatusFound, redirectTo)
 }

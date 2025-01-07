@@ -9,7 +9,7 @@ import (
 
 func Config() *oauth2.Config {
 	return &oauth2.Config{
-		RedirectURL:  "http://localhost:3000/auth/callback/google",
+		RedirectURL:  "http://localhost:6740/auth/google/callback",
 		ClientID:     os.Getenv("GOOGLE_ID"),
 		ClientSecret: os.Getenv("GOOGLE_SECRET"),
 		Scopes: []string{

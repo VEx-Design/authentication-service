@@ -1,6 +1,6 @@
 package logic
 
-import "project-management-service/internal/core/entities"
+import "authentication-service/internal/core/entities"
 
 type UserService interface {
 	GenerateJWT(ID string, Email string) (string, error)

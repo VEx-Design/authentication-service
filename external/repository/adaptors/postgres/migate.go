@@ -1,7 +1,7 @@
 package gorm
 
 import (
-	models "project-management-service/external/repository/adaptors/postgres/model"
+	models "authentication-service/external/repository/adaptors/postgres/model"
 
 	"gorm.io/gorm"
 )

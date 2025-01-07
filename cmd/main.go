@@ -1,13 +1,13 @@
 package main
 
 import (
+	handler "authentication-service/external/handler/adaptors/gin/api"
+	"authentication-service/external/handler/adaptors/gin/router"
+	gorm "authentication-service/external/repository/adaptors/postgres"
+	repository "authentication-service/external/repository/adaptors/postgres/controller"
+	"authentication-service/internal/core/service"
+	"authentication-service/pkg/db"
 	"log"
-	handler "project-management-service/external/handler/adaptors/gin/api"
-	"project-management-service/external/handler/adaptors/gin/router"
-	gorm "project-management-service/external/repository/adaptors/postgres"
-	repository "project-management-service/external/repository/adaptors/postgres/controller"
-	"project-management-service/internal/core/service"
-	"project-management-service/pkg/db"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -30,5 +30,5 @@ func main() {
 
 	r := gin.Default()
 	router.AuthRoutes(r, *authHandler)
-	r.Run(":3000")
+	r.Run(":6740")
 }

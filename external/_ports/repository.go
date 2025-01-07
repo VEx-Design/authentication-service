@@ -1,6 +1,6 @@
 package ports
 
-import "project-management-service/internal/core/entities"
+import "authentication-service/internal/core/entities"
 
 type UserRepository interface {
 	AddUser(userData entities.User) (res string)

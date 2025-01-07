@@ -1,4 +1,4 @@
-module project-management-service
+module authentication-service
 
 go 1.22
 

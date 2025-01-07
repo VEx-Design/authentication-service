@@ -1,10 +1,10 @@
 package service
 
 import (
+	ports "authentication-service/external/_ports"
+	"authentication-service/internal/core/entities"
+	"authentication-service/internal/core/logic"
 	"os"
-	ports "project-management-service/external/_ports"
-	"project-management-service/internal/core/entities"
-	"project-management-service/internal/core/logic"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
