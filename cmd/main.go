@@ -7,7 +7,7 @@ import (
 	repository "authentication-service/external/repository/adaptors/postgres/controller"
 	"authentication-service/internal/core/service"
 	"authentication-service/pkg/db"
-	"log"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -16,7 +16,7 @@ import (
 func main() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatalf("err loading: %v", err)
+		fmt.Println("Warning: .env file not found, relying on environment variables")
 	}
 
 	postgresDB := db.ConnectToPG()

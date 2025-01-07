@@ -6,6 +6,7 @@ import (
 	"authentication-service/internal/core/logic"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -52,6 +53,7 @@ func (h *AuthHandler) GoogleCallback(c *gin.Context) {
 	googleConfig := google.Config()
 	tokeng, err := googleConfig.Exchange(context.Background(), code)
 	if err != nil {
+		fmt.Print(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Token exchange failed"})
 		return
 	}
