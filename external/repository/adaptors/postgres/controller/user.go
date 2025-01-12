@@ -16,7 +16,7 @@ func NewUserRepositoryPQ(client *gorm.DB) ports.UserRepository {
 	return &userRepositoryPQ{client: client}
 }
 
-func (r *userRepositoryPQ) AddUser(userData entities.User) (res string) {
+func (r *userRepositoryPQ) AddUser(userData entities.User) error {
 	var user models.User
 	if err := r.client.FirstOrCreate(&user, models.User{
 		ID:      userData.ID,
@@ -24,7 +24,24 @@ func (r *userRepositoryPQ) AddUser(userData entities.User) (res string) {
 		Name:    userData.Name,
 		Picture: userData.Picture,
 	}).Error; err != nil {
-		return "have error"
+		return err
 	}
-	return "success"
+	return nil
+}
+
+func (r *userRepositoryPQ) GetUserByEmail(email string) (isFound bool, res entities.User, err error) {
+	var user models.User
+	if err := r.client.Where("email = ?", email).First(&user).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return false, entities.User{}, nil
+		} else {
+			return false, entities.User{}, err
+		}
+	}
+	return true, entities.User{
+		ID:      user.ID,
+		Email:   user.Email,
+		Name:    user.Name,
+		Picture: user.Picture,
+	}, nil
 }

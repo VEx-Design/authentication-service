@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 type AuthHandler struct {
@@ -81,16 +80,22 @@ func (h *AuthHandler) GoogleCallback(c *gin.Context) {
 		return
 	}
 
-	userId := uuid.New().String()
-	err = h.userSrv.CreateUser(entities.User{
-		ID:      userId,
-		Email:   userInfo.Email,
-		Name:    userInfo.Name,
-		Picture: userInfo.Picture,
-	})
+	isCreated, userId, err := h.userSrv.CheckUser(userInfo.Email)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to check user"})
 		return
+	}
+
+	if !isCreated {
+		userId, err = h.userSrv.CreateUser(entities.User{
+			Email:   userInfo.Email,
+			Name:    userInfo.Name,
+			Picture: userInfo.Picture,
+		})
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+			return
+		}
 	}
 
 	token, err := h.userSrv.GenerateJWT(userId, userInfo.Email)
